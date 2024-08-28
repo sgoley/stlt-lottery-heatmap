@@ -1,0 +1,19 @@
+[project]
+name = "stlt-lottery-heatmap"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "streamlit>=1.37.1",
+    "pandas>=2.2.2",
+    "plotly>=5.23.0",
+    "scipy>=1.13.1",
+    "beautifulsoup4>=4.12.3",
+    "seaborn>=0.13.2",
+    "ipykernel>=6.29.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
