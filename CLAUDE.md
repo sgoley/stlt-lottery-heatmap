@@ -3,51 +3,69 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-This is a lottery data analysis and visualization project that creates heatmaps for Powerball and Mega Millions lottery numbers. The main application is a Streamlit web app that displays frequency and date-weighted analysis of lottery drawings.
-
-## Dependencies
-Core dependencies (defined in setup.py):
-- `requests` - for web scraping
-- `bs4` (BeautifulSoup) - for HTML parsing
-- `numpy` - numerical operations
-- `pandas` - data manipulation
-- `seaborn` - statistical plotting
-- `matplotlib` - visualization
-- `streamlit` - web app framework
-- `plotly` - interactive visualizations
+A lottery data analysis and visualization project that creates heatmaps for Powerball and Mega Millions lottery numbers. The main application is a Streamlit web app displaying frequency and date-weighted analysis of lottery drawings arranged to match actual lottery ticket layouts.
 
 ## Running the Application
 - Main Streamlit app: `streamlit run app.py`
-- Data collection scripts can be run directly with Python
+- Docker: Build with `docker build -t lottery-heatmap .` and run with `docker run -p 8501:8501 lottery-heatmap`
+- Individual data processing scripts: `python pb_mm_csv_link.py` or `python pb_mm_tsv_page.py`
+
+## Dependencies  
+Key dependencies (defined in requirements.txt):
+- `streamlit>=1.37.1` - web app framework
+- `pandas>=2.2.2`, `numpy>=2.3.1` - data manipulation
+- `plotly>=5.23.0` - interactive visualizations  
+- `matplotlib>=3.10.3`, `seaborn>=0.13.2` - statistical plotting
+- `requests>=2.32.4`, `beautifulsoup4>=4.12.3` - web scraping
 
 ## Architecture
-The project consists of three main components:
+Multi-page Streamlit application with comprehensive lottery analysis:
 
-1. **app.py** - Main Streamlit application
-   - Interactive web interface with sidebar controls for game selection (Powerball/Megamillions)
-   - Date range selection (single date or starting date mode)
-   - Visualization type selection (Frequency vs Date Weighted)
-   - Generates dual heatmaps: main numbers (10x7 grid) and special numbers (4x7 grid)
-   - Date weighting uses exponential decay based on recency
+**app.py** - Primary Streamlit application featuring:
+- **Multi-page structure**: History Analysis and Gap Analysis pages
+- **Dual data source modes**: CSV Direct vs Web Scraping (both pages)
+- **History Page**: Traditional frequency and date-weighted analysis
+  - Interactive sidebar controls for game/date/visualization selection
+  - Two analysis modes: Frequency (raw counts) vs Date Weighted (exponential decay by recency)
+  - Date range filtering with inclusive start/end dates and helpful tooltips
+  - Row selection for targeted heatmap analysis
+  - Dual heatmap visualization: main numbers (10x7 grid) + special/power balls (4x7 grid)
+  - CSV export functionality for filtered datasets
+- **Gap Analysis Page**: Historical vs recent pattern comparison
+  - Dual date range selection (historical baseline vs recent period)
+  - Preset options: Last 30/60 days, Year to date, Since last jackpot win, Custom
+  - Difference calculation: Historical Frequency - Recent Frequency
+  - Red-blue divergent heatmaps showing "overdue" vs "hot" numbers
+  - Top 5 most overdue numbers analysis with frequency gaps
 
-2. **pb_mm_csv_link.py** - CSV-based data processing
-   - Downloads lottery data from Texas Lottery CSV URLs
-   - Focuses on Powerball data analysis
-   - Creates frequency heatmaps using matplotlib/seaborn
+**pb_mm_csv_link.py** - CSV-based data processor:
+- Direct CSV download from Texas Lottery endpoints
+- Matplotlib/seaborn-based static heatmap generation
+- Focused primarily on Powerball analysis
 
-3. **pb_mm_tsv_page.py** - Web scraping approach
-   - Scrapes lottery data from HTML tables using BeautifulSoup
-   - Creates interactive heatmaps using Plotly
-   - Processes data into structured DataFrame format
+**pb_mm_tsv_page.py** - Web scraping processor:
+- BeautifulSoup-based HTML table extraction
+- Plotly interactive heatmap generation
+- Handles richer web data (jackpot amounts, winners, etc.)
 
-## Data Sources
-- Texas Lottery CSV endpoints for current data
-- Texas Lottery HTML tables for historical data
-- Local CSV files in `/data` directory for offline processing
+## Data Sources & Structure
+- **Live CSV URLs**: Texas Lottery endpoints for Powerball/Mega Millions current data
+- **Web Scraping URLs**: HTML table data with additional jackpot/winner information  
+- **Local Data**: `/data/texas/` contains CSV samples, `/data/` has historical datasets
+- **Ticket Layouts**: `/ticketlayouts/` contains reference images for various state lottery card layouts
 
-## Key Features
-- **Frequency Analysis**: Raw count of number occurrences
-- **Date Weighted Analysis**: Recent drawings weighted more heavily using exponential decay
-- **Dual Heatmap Display**: Separate visualizations for main numbers and special/power balls
-- **Interactive Controls**: Game selection, date filtering, analysis type switching
-- **Data Export**: CSV download functionality for filtered datasets
+## Key Technical Patterns
+- **Multi-page Navigation**: Sidebar page selector for History vs Gap Analysis modes
+- **Date Filtering**: Supports single-date overlay, date-range frequency analysis, and dual date range comparison
+- **Number Grid Layout**: Mimics actual lottery ticket arrangements (10x7 main + 4x7 special)
+- **Matrix Creation Logic**: Uses `divmod(value, 7)` for proper lottery grid positioning (col=quotient, row=remainder)
+- **Exponential Decay Weighting**: Recent drawings weighted more heavily using configurable decay factor
+- **Gap Analysis Algorithm**: Calculates frequency differences between historical and recent periods
+- **Dual Visualization Strategy**: Plotly for interactive heatmaps with proper axis labeling and number annotations
+- **Data Source Flexibility**: Both pages support CSV and web scraping with unified data processing pipelines
+
+## Gap Analysis Use Cases
+- **Year-to-date vs Last 30 days**: Identify historically common numbers that haven't appeared recently
+- **Long historical vs Recent periods**: Find patterns that might be "due" based on historical frequency
+- **Since last jackpot**: Compare pre/post jackpot number patterns using jackpot winner data
+- **Custom date ranges**: Flexible comparison of any two time periods for strategic analysis
